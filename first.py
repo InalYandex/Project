@@ -23,11 +23,12 @@ OBSTACLE_Y = HEIGHT - OBSTACLE_HEIGHT
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Flappy Bird")
 
+background_img = pygame.image.load("prosto.jpg")
+background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
+bird_img = pygame.image.load("bыыыird.png")
+bird_img = pygame.transform.scale(bird_img, (BIRD_SIZE, BIRD_SIZE))
+
 clock = pygame.time.Clock()
-
-
-def draw_bird(x, y):
-    pygame.draw.rect(screen, WHITE, (x, y, BIRD_SIZE, BIRD_SIZE))
 
 
 def draw_obstacle(x, height):
@@ -37,12 +38,33 @@ def draw_obstacle(x, height):
 
 def game_over():
     font = pygame.font.Font(None, 74)
-    text = font.render("Game Over", True, WHITE)
-    screen.blit(text, (WIDTH // 2 - 200, HEIGHT // 2 - 50))
+    text = font.render("Начать заново? Нажми пробел", True, WHITE)
+    screen.blit(text, (WIDTH // 2 - 400, HEIGHT // 2 - 50))
     pygame.display.flip()
-    pygame.time.wait(2000)
-    pygame.quit()
-    sys.exit()
+    wait_for_restart()
+
+
+def wait_for_restart():
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    reset_game()
+                    waiting = False
+
+
+def reset_game():
+    global BIRD_Y, OBSTACLE_X, OBSTACLE_HEIGHT, obstacle_passed, bird_y_change
+
+    BIRD_Y = HEIGHT // 2 - BIRD_SIZE // 2
+    bird_y_change = 0
+    OBSTACLE_X = WIDTH
+    OBSTACLE_HEIGHT = random.randint(100, 400)
+    obstacle_passed = False
 
 
 bird_y_change = 0
@@ -66,7 +88,7 @@ while running:
     elif BIRD_Y > HEIGHT - BIRD_SIZE:
         game_over()
 
-    screen.fill(BLUE)
+    screen.blit(background_img, (0, 0))
 
     draw_obstacle(OBSTACLE_X, OBSTACLE_HEIGHT)
     OBSTACLE_X -= obstacle_speed
@@ -76,7 +98,7 @@ while running:
         OBSTACLE_HEIGHT = random.randint(100, 400)
         obstacle_passed = False
 
-    draw_bird(BIRD_X, BIRD_Y)
+    screen.blit(bird_img, (BIRD_X, BIRD_Y))
 
     if BIRD_X + BIRD_SIZE > OBSTACLE_X and BIRD_X < OBSTACLE_X + OBSTACLE_WIDTH:
         if BIRD_Y < OBSTACLE_HEIGHT or BIRD_Y + BIRD_SIZE > OBSTACLE_HEIGHT + 200:
